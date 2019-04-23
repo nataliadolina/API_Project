@@ -33,38 +33,28 @@ def handle_dialog(req, res):
 
     if req['session']['new']:
         res['response']['text'] = 'Привет! как тебя зовут?'
-        sessionStorage[user_id] = {'first_name': None, 'game_started': False, 'ins': False}
+        sessionStorage[user_id] = {'first_name': None}
         return
-    if not sessionStorage[user_id]['game_started']:
-        if sessionStorage[user_id]['first_name'] is None:
-            first_name = get_first_name(req)
-            if first_name is None:
-                res['response']['text'] = 'Не расслышала имя. Повтори, пожалуйста!'
-            else:
-                sessionStorage[user_id]['first_name'] = first_name
-                sessionStorage[user_id]['guessed_cities'] = []
-                res['response'][
-                    'text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса. Сыграешь со мной в игру?'
-                res['response']['buttons'] = [{'title': 'Да', 'hide': True}, {'title': 'Нет', 'hide': True},
-                                              {'title': 'Какая игра', 'hide': True}]
-                req['session']['new'] = False
-        if req['request']['original_utterance'].lower() == 'Какая игра':
-            res['response']['text'] = 'Игра на развитие речи. Тебе будет дано 30 секунд, в течение которых' \
-                                      ' ты будешь вводить прилагательные на английском языке.' \
-                                      ' Чем больше слов, тем лучше. Итак, поехали?'
-            sessionStorage[user_id]['ins'] = True
-            res['response']['buttons'] = [{'title': 'Да', 'hide': True}, {'title': 'Нет', 'hide': True}, ]
-        if 'да' in req['request']['original_utterance'].lower() or 'ага' in req['request'][
-            'original_utterance'].lower():
-            res['response']['text'] = 'Время пошло'
-            sessionStorage[user_id]['game_started'] = True
-        elif 'нет' in req['request']['original_utterance'].lower() or 'неа' in req['request'][
-            'original_utterance'].lower():
-            res['response']['text'] = 'Ну и пожалуйста'
-            res['response']['buttons'] = [{'title': 'Алиса, не обижайся', 'hide': True}]
-
-    else:
-        res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}, {'title': 'Стоп', 'hide': False}, ]
+    if sessionStorage[user_id]['first_name'] is None:
+        first_name = get_first_name(req)
+        if first_name is None:
+            res['response']['text'] = 'Не расслышала имя. Повтори, пожалуйста!'
+        else:
+            sessionStorage[user_id]['first_name'] = first_name
+            sessionStorage[user_id]['guessed_cities'] = []
+            res['response']['text'] = f'Приятно познакомиться, {first_name.title()}. Я Алиса.' \
+                                      f' Хочешь расширить свой словарный запас?' \
+                                      f' Тогда скорее вводи слово на русском или' \
+                                      f' английском языке,я его переведу и покажу синонимы'
+            res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]
+            req['session']['new'] = False
+    if req['request']['command'].lower() == 'Помощь':
+        res['response']['text'] = 'Введи любое слово на русском языке,' \
+                                  ' и Алиса даст несколько синонимов на английском.' \
+                                  ' Если введешь на английском-Алиса переведет на русский.' \
+                                  ' Если введешь слова на любом другом языке, Алиса будет ругаться. Не обижай Алису'
+        sessionStorage[user_id]['ins'] = True
+        res['response']['buttons'] = [{'title': 'Да', 'hide': True}, {'title': 'Нет', 'hide': True}, ]
 
 
 def play_game(res, req, user_id):
