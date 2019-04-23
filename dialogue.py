@@ -1,8 +1,8 @@
-from yandex_translate import YandexTranslate
 from flask import Flask, request
 import logging
 import time
 import json
+from tests import word_search
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -17,15 +17,6 @@ def main():
     handle_dialog(request.json, response)
     logging.info('Response: %r', request.json)
     return json.dumps(response)
-
-
-def translate(text):
-    trans = YandexTranslate('trnsl.1.1.20190421T135944Z.7292abf1150a9315.88e1b4e89ec715ff8de021cc3eaf0ef1cae0259b')
-    resp = ''.join(trans.translate(text, 'en-ru')['text'])
-    if resp != text:
-        return resp
-    else:
-        return False
 
 
 def handle_dialog(req, res):
@@ -46,23 +37,18 @@ def handle_dialog(req, res):
                                       f' Хочешь расширить свой словарный запас?' \
                                       f' Тогда скорее вводи слово на русском или' \
                                       f' английском языке,я его переведу и покажу синонимы'
-            res['response']['buttons'] = [{'title': 'Помощь', 'hide': False}]
             req['session']['new'] = False
-    if req['request']['command'].lower() == 'Помощь':
-        res['response']['text'] = 'Введи любое слово на русском языке,' \
-                                  ' и Алиса даст несколько синонимов на английском.' \
-                                  ' Если введешь на английском-Алиса переведет на русский.' \
-                                  ' Если введешь слова на любом другом языке, Алиса будет ругаться. Не обижай Алису'
-        sessionStorage[user_id]['ins'] = True
-        res['response']['buttons'] = [{'title': 'Да', 'hide': True}, {'title': 'Нет', 'hide': True}, ]
-
-
-def play_game(res, req, user_id):
-    session = sessionStorage[user_id]
-    session['current_time'] = time.clock()
-    if session['current_time'] - session['start'] >= 30:
-        res['response']['text'] = 'Время закончено'
-        res['end_session'] = False
+    else:
+        res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}]
+        if req['request']['command']:
+            if req['request']['command'] == 'Помощь':
+                res['response']['text'] = 'Введи любое слово на русском языке,' \
+                                          ' и Алиса даст несколько синонимов на английском.' \
+                                          ' Если введешь на английском, Алиса переведет на русский.' \
+                                          ' Если введешь слова на любом другом языке,' \
+                                          ' Алиса будет ругаться. Не обижай Алису'
+        if not req['request']['command']:
+            res['response']['text'] = word_search(req['request']['original_utterance'])
 
 
 def get_first_name(req):
