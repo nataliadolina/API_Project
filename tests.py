@@ -63,7 +63,6 @@ def word_search(text, my_lang=False):
 def translate(text):
     abc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
     trans = YandexTranslate('trnsl.1.1.20190421T135944Z.7292abf1150a9315.88e1b4e89ec715ff8de021cc3eaf0ef1cae0259b')
-    resp = ''.join(trans.translate(text, 'en-ru')['text'])
     if text.lower()[0] not in abc:
         resp = ''.join(trans.translate(text, 'en-ru')['text'])
     else:
@@ -74,7 +73,6 @@ def translate(text):
 
 
 def give_examples(text, my_lang=False):
-    abc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
     api_server = 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?'
     key = 'dict.1.1.20190423T161441Z.0dd9fab002fa5efa.5b4f442e77ee05b6d0d5aca59134cce7570126d1'
     l = ''
@@ -93,7 +91,6 @@ def give_examples(text, my_lang=False):
         t = 'примеры на ' + par[0].split()[-1]
     params = {"key": key, "lang": lang, "text": text}
     response = requests.get(api_server, params=params)
-    print(response.json()['def'][0]['tr'])
     try:
         for i in response.json()['def'][0]['tr'][0]['ex']:
             l += i['tr'][0]['text'] + '\n'
@@ -102,11 +99,8 @@ def give_examples(text, my_lang=False):
             for i in response.json()['def'][1]['tr'][0]['ex']:
                 l += i['tr'][0]['text'] + '\n'
         except Exception as e:
-            return 'Упс, получилось найти примеры'
+            return 'Упс, не получилось найти примеры'
         else:
             return t + '\n' + l
     else:
         return t + '\n' + l
-
-
-print(give_examples('полный', True))
