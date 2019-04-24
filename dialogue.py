@@ -1,6 +1,5 @@
 from flask import Flask, request
 import logging
-import time
 import json
 from tests import word_search
 
@@ -47,8 +46,13 @@ def handle_dialog(req, res):
                                           ' Если введешь на английском, Алиса переведет на русский.' \
                                           ' Если введешь слова на любом другом языке,' \
                                           ' Алиса будет ругаться. Не обижай Алису'
-        if not req['request']['command']:
-            res['response']['text'] = word_search(req['request']['original_utterance'])
+            else:
+                res['response']['text'] = word_search(req['request']['original_utterance'])
+                if sessionStorage[user_id]['words']:
+                    sessionStorage[user_id]['words'] = []
+                    sessionStorage[user_id]['words'].append(req['request']['original_utterance'])
+                else:
+                    sessionStorage[user_id]['words'].append(req['request']['original_utterance'])
 
 
 def get_first_name(req):
