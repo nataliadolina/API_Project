@@ -4,7 +4,7 @@ import json
 from tests import word_search, give_examples
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 sessionStorage = {}
 
 
@@ -98,20 +98,27 @@ def handle_dialog(req, res):
                     res['response']['text'] = 'Ты хочешь получить примеры к данному слову или синонимы?'
                     res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Примеры', 'hide': True},
                                                   {'title': 'Синонимы', 'hide': True}]
-            if sessionStorage[user_id]['rus'] or sessionStorage[user_id]['eng']:
+            if (sessionStorage[user_id]['rus'] or sessionStorage[user_id]['eng'])\
+                    and (sessionStorage[user_id]['examples'] or sessionStorage[user_id]['syn']):
                 if sessionStorage[user_id]['examples']:
-                    if sessionStorage[user_id]['words'][0] in sessionStorage[user_id]['abc']:
+                    logging.debug("попали в примеры")
+                    if sessionStorage[user_id]['words'][0].lower() in sessionStorage[user_id]['abc']:
                         if sessionStorage[user_id]['rus']:
                             res['response']['text'] = give_examples(sessionStorage[user_id]['words'], True)
+                            logging.debug("переводим с русского на русский")
                         else:
                             res['response']['text'] = give_examples(sessionStorage[user_id]['words'])
+                            logging.debug("переводим с русского на английский")
                     else:
                         if sessionStorage[user_id]['eng']:
+                            logging.debug("переводим с английского на русский")
                             res['response']['text'] = give_examples(sessionStorage[user_id]['words'], True)
                         else:
+                            logging.debug("переводим с английского на английский")
                             res['response']['text'] = give_examples(sessionStorage[user_id]['words'])
                 else:
-                    if sessionStorage[user_id]['words'][0] in sessionStorage[user_id]['abc']:
+                    logging.debug("попали в синонимы")
+                    if sessionStorage[user_id]['words'][0].lower() in sessionStorage[user_id]['abc']:
                         if sessionStorage[user_id]['rus']:
                             res['response']['text'] = (sessionStorage[user_id]['words'], True)
                         else:
@@ -121,3 +128,5 @@ def handle_dialog(req, res):
                             res['response']['text'] = word_search(sessionStorage[user_id]['words'], True)
                         else:
                             res['response']['text'] = word_search(sessionStorage[user_id]['words'])
+
+app.run()
