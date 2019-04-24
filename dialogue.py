@@ -1,7 +1,7 @@
 from flask import Flask, request
 import logging
 import json
-from tests import word_search, give_examples, infinitive
+from tests import word_search, give_examples
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -98,5 +98,26 @@ def handle_dialog(req, res):
                     res['response']['text'] = 'Ты хочешь получить примеры к данному слову или синонимы?'
                     res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Примеры', 'hide': True},
                                                   {'title': 'Синонимы', 'hide': True}]
-                #elif sessionStorage[user_id]['rus'] or sessionStorage[user_id]['eng']:
-
+            if sessionStorage[user_id]['rus'] or sessionStorage[user_id]['eng']:
+                if sessionStorage[user_id]['examples']:
+                    if sessionStorage[user_id]['words'][0] in sessionStorage[user_id]['abc']:
+                        if sessionStorage[user_id]['rus']:
+                            res['response']['text'] = give_examples(sessionStorage[user_id]['words'], True)
+                        else:
+                            res['response']['text'] = give_examples(sessionStorage[user_id]['words'])
+                    else:
+                        if sessionStorage[user_id]['eng']:
+                            res['response']['text'] = give_examples(sessionStorage[user_id]['words'], True)
+                        else:
+                            res['response']['text'] = give_examples(sessionStorage[user_id]['words'])
+                else:
+                    if sessionStorage[user_id]['words'][0] in sessionStorage[user_id]['abc']:
+                        if sessionStorage[user_id]['rus']:
+                            res['response']['text'] = (sessionStorage[user_id]['words'], True)
+                        else:
+                            res['response']['text'] = word_search(sessionStorage[user_id]['words'])
+                    else:
+                        if sessionStorage[user_id]['eng']:
+                            res['response']['text'] = word_search(sessionStorage[user_id]['words'], True)
+                        else:
+                            res['response']['text'] = word_search(sessionStorage[user_id]['words'])
