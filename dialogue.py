@@ -51,7 +51,7 @@ def handle_dialog(req, res):
                                       f' Хочешь расширить свой словарный запас?' \
                                       f' Тогда скорее вводи слово на русском или' \
                                       f' английском языке'
-            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Не хочу', 'hide': True}]
+            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}]
             req['session']['new'] = False
     else:
         res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}]
