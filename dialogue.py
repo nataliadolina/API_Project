@@ -1,7 +1,7 @@
 from flask import Flask, request
 import logging
 import json
-from tests import word_search, give_examples
+from tests import word_search, give_examples, russian
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +22,13 @@ def get_first_name(req):
     for entity in req['request']['nlu']['entities']:
         if entity['type'] == 'YANDEX.FIO':
             return entity['value'].get('first_name', None)
+
+
+def language(text, user_id):
+    if russian(text) and sessionStorage[user_id]['rus'] or not russian(sessionStorage[user_id]['word']) and not \
+            sessionStorage[user_id]['rus']:
+        return True
+    return False
 
 
 def handle_dialog(req, res):
@@ -58,6 +65,7 @@ def handle_dialog(req, res):
         elif req['request']['command'] == 'Сменить настройки':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = False, False
             sessionStorage[user_id]['eng'], sessionStorage[user_id]['rus'] = False, False
+            res['response']['text'] = 'Введи слово'
         if req['request']['original_utterance'] == 'Примеры':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = True, False
         elif req['request']['original_utterance'] == 'Синонимы':
@@ -78,9 +86,11 @@ def handle_dialog(req, res):
             res['response']['text'] = 'Ты хочешь получить примеры к данному слову или синонимы?'
             res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Примеры', 'hide': True},
                                           {'title': 'Синонимы', 'hide': True}]
-        if (sessionStorage[user_id]['eng'] or sessionStorage[user_id]['rus']) and (
-                sessionStorage[user_id]['examples'] or sessionStorage[user_id]['syn']):
-            if sessionStorage[user_id]['word']:
-                res['response']['text'] = give_examples(sessionStorage[user_id]['word'])
-                res['response']['buttons'] = [{'title': 'Помощь', 'hide': True},
-                                              {'title': 'Сменить настройки', 'hide': True}]
+        if sessionStorage[user_id]['eng'] or sessionStorage[user_id]['rus']:
+            text = sessionStorage[user_id]['word']
+            if sessionStorage[user_id]['examples']:
+                res['response']['text'] = give_examples(text, language(text, user_id))
+            else:
+                res['response']['text'] = word_search(text, language(text, user_id))
+            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True},
+                                          {'title': 'Сменить настройки', 'hide': True}]

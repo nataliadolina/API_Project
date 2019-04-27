@@ -38,17 +38,23 @@ def my_lang1(text, my_lang=False):
     else:
         return False
 
+
+def russian(text):
+    abc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+    if text.lower()[0] not in abc:
+        return True
+    return False
+
+
 def word_search(text, my_lang=False):
     api_server = 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?'
     key = 'dict.1.1.20190423T161441Z.0dd9fab002fa5efa.5b4f442e77ee05b6d0d5aca59134cce7570126d1'
-    lang = ''
-    t = ''
     if my_lang:
         par = my_lang1(text, True)
     else:
         par = my_lang1(text)
     if not par:
-        return 'Не матерись'
+        return 'Вводи слова на русском или английском языке, а не на своем выдуманном'
     else:
         t, lang = par
     params = {"key": key, "lang": lang, "text": text}
@@ -56,13 +62,12 @@ def word_search(text, my_lang=False):
     try:
         return t + '\n' + '\n'.join(list(map(lambda x: x['text'], response.json()['def'][0]['tr'][0]['syn'])))
     except Exception as e:
-        return 'Не матерись'
+        return 'Упс, не получилось найти синонимы'
 
 
 def translate(text):
-    abc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
     trans = YandexTranslate('trnsl.1.1.20190421T135944Z.7292abf1150a9315.88e1b4e89ec715ff8de021cc3eaf0ef1cae0259b')
-    if text.lower()[0] not in abc:
+    if not russian(text):
         resp = ''.join(trans.translate(text, 'en-ru')['text'])
     else:
         resp = ''.join(trans.translate(text, 'ru-en')['text'])
@@ -74,7 +79,7 @@ def translate(text):
 def give_examples(text, my_lang=False):
     api_server = 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?'
     key = 'dict.1.1.20190423T161441Z.0dd9fab002fa5efa.5b4f442e77ee05b6d0d5aca59134cce7570126d1'
-    l = ''
+    all_text = ''
     if my_lang:
         try:
             text = translate(text)
@@ -84,7 +89,7 @@ def give_examples(text, my_lang=False):
     else:
         par = my_lang1(text)
     if not par:
-        return 'Не матерись'
+        return 'Вводи слова на русском или английском языке, а не на своем выдуманном'
     else:
         lang = par[1]
         t = 'примеры на ' + par[0].split()[-1]
@@ -92,14 +97,14 @@ def give_examples(text, my_lang=False):
     response = requests.get(api_server, params=params)
     try:
         for i in response.json()['def'][0]['tr'][0]['ex']:
-            l += i['tr'][0]['text'] + '\n'
+            all_text += i['tr'][0]['text'] + '\n'
     except Exception as e:
         try:
             for i in response.json()['def'][1]['tr'][0]['ex']:
-                l += i['tr'][0]['text'] + '\n'
+                all_text += i['tr'][0]['text'] + '\n'
         except Exception as e:
             return 'Упс, не получилось найти примеры'
         else:
-            return t + '\n' + l
+            return t + '\n' + all_text
     else:
-        return t + '\n' + l
+        return t + '\n' + all_text
