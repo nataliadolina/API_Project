@@ -55,15 +55,7 @@ def handle_dialog(req, res):
             req['session']['new'] = False
     else:
         res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}]
-        if req['request']['command'] == 'Помощь':
-            res['response']['text'] = 'Введи любое слово на русском или английском языке.' \
-                                      ' Я спрошу у тебя, какую информацию об этом слове ты хочешь получить.' \
-                                      ' Я умею давать примеры и синонимы к твоим' \
-                                      ' словам на русском и английском языках.' \
-                                      ' Просто напиши, какой язык тебе нужен!' \
-                                      ' Если захочешь, чтобы я еще раз спросила у тебя настройки,' \
-                                      ' жмякни на кнопку "Сменить настройки"'
-        elif req['request']['command'] == 'Сменить настройки':
+        if req['request']['command'] == 'Сменить настройки':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = False, False
             sessionStorage[user_id]['eng'], sessionStorage[user_id]['rus'] = False, False
         elif req['request']['original_utterance'] == 'Примеры':
@@ -95,3 +87,11 @@ def handle_dialog(req, res):
                         res['response']['text'] = word_search(text, language(text, user_id))
                     res['response']['buttons'] = [{'title': 'Помощь', 'hide': True},
                                                   {'title': 'Сменить настройки', 'hide': True}]
+        else:
+            res['response']['text'] = 'Введи любое слово на русском или английском языке.' \
+                                      ' Я спрошу у тебя, какую информацию об этом слове ты хочешь получить.' \
+                                      ' Я умею давать примеры и синонимы к твоим' \
+                                      ' словам на русском и английском языках.' \
+                                      ' Просто напиши, какой язык тебе нужен!' \
+                                      ' Если захочешь, чтобы я еще раз спросила у тебя настройки,' \
+                                      ' жмякни на кнопку "Сменить настройки"'
