@@ -51,6 +51,7 @@ def handle_dialog(req, res):
                                       f' Хочешь расширить свой словарный запас?' \
                                       f' Тогда скорее вводи слово на русском или' \
                                       f' английском языке'
+            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Не хочу', 'hide': True}]
             req['session']['new'] = False
     else:
         res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}]
@@ -65,8 +66,7 @@ def handle_dialog(req, res):
         elif req['request']['command'] == 'Сменить настройки':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = False, False
             sessionStorage[user_id]['eng'], sessionStorage[user_id]['rus'] = False, False
-            res['response']['text'] = 'Введи слово'
-        if req['request']['original_utterance'] == 'Примеры':
+        elif req['request']['original_utterance'] == 'Примеры':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = True, False
         elif req['request']['original_utterance'] == 'Синонимы':
             sessionStorage[user_id]['examples'], sessionStorage[user_id]['syn'] = False, True
@@ -76,21 +76,22 @@ def handle_dialog(req, res):
             sessionStorage[user_id]['rus'], sessionStorage[user_id]['eng'] = False, True
         else:
             sessionStorage[user_id]['word'] = req['request']['original_utterance']
-
-        if not sessionStorage[user_id]['eng'] and not sessionStorage[user_id]['rus']:
-            res['response']['text'] = 'На русском или на английском?'
-            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Русский', 'hide': True},
-                                          {'title': 'Английский', 'hide': True},
-                                          {'title': 'Сменить настройки', 'hide': True}]
-        if not sessionStorage[user_id]['examples'] and not sessionStorage[user_id]['syn']:
-            res['response']['text'] = 'Ты хочешь получить примеры к данному слову или синонимы?'
-            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Примеры', 'hide': True},
-                                          {'title': 'Синонимы', 'hide': True}]
-        if sessionStorage[user_id]['eng'] or sessionStorage[user_id]['rus']:
-            text = sessionStorage[user_id]['word']
-            if sessionStorage[user_id]['examples']:
-                res['response']['text'] = give_examples(text, language(text, user_id))
-            else:
-                res['response']['text'] = word_search(text, language(text, user_id))
-            res['response']['buttons'] = [{'title': 'Помощь', 'hide': True},
-                                          {'title': 'Сменить настройки', 'hide': True}]
+        if req['request']['original_utterance'] != 'Помощь':
+            if not sessionStorage[user_id]['eng'] and not sessionStorage[user_id]['rus']:
+                res['response']['text'] = 'На русском или на английском?'
+                res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Русский', 'hide': True},
+                                              {'title': 'Английский', 'hide': True},
+                                              {'title': 'Сменить настройки', 'hide': True}]
+            if not sessionStorage[user_id]['examples'] and not sessionStorage[user_id]['syn']:
+                res['response']['text'] = 'Ты хочешь получить примеры к данному слову или синонимы?'
+                res['response']['buttons'] = [{'title': 'Помощь', 'hide': True}, {'title': 'Примеры', 'hide': True},
+                                              {'title': 'Синонимы', 'hide': True}]
+            if sessionStorage[user_id]['eng'] or sessionStorage[user_id]['rus']:
+                if sessionStorage[user_id]['word']:
+                    text = sessionStorage[user_id]['word']
+                    if sessionStorage[user_id]['examples']:
+                        res['response']['text'] = give_examples(text, language(text, user_id))
+                    else:
+                        res['response']['text'] = word_search(text, language(text, user_id))
+                    res['response']['buttons'] = [{'title': 'Помощь', 'hide': True},
+                                                  {'title': 'Сменить настройки', 'hide': True}]

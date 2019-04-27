@@ -41,12 +41,12 @@ def my_lang1(text, my_lang=False):
 
 def russian(text):
     abc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-    if text.lower()[0] not in abc:
+    if text.lower()[0] in abc:
         return True
     return False
 
 
-def word_search(text, my_lang=False):
+def word_search(text, my_lang):
     api_server = 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?'
     key = 'dict.1.1.20190423T161441Z.0dd9fab002fa5efa.5b4f442e77ee05b6d0d5aca59134cce7570126d1'
     if my_lang:
@@ -54,7 +54,7 @@ def word_search(text, my_lang=False):
     else:
         par = my_lang1(text)
     if not par:
-        return 'Вводи слова на русском или английском языке, а не на своем выдуманном'
+        return 'Упс, не получилось найти синонимы'
     else:
         t, lang = par
     params = {"key": key, "lang": lang, "text": text}
@@ -85,7 +85,7 @@ def give_examples(text, my_lang=False):
             text = translate(text)
             par = my_lang1(text)
         except Exception as e:
-            return 'Упс, получилось найти примеры'
+            return 'Такого слова не существует'
     else:
         par = my_lang1(text)
     if not par:
